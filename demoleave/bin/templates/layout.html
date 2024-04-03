@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>layout</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<nav th:fragment="navbar"  class="navbar navbar-expand-lg bg-light fixed-top shadow-lg">
+    <div class="container">
+        <a style="font-family: 'Gigi', sans-serif" class="navbar-brand" href="#">Gra<span class="redfont">nny</span><span class="greenfont">Leave</span></a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">AAA</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle click-scroll" href="#" id="navbarLightDropdownMenuLink"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">BBB</a>
+
+                    <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="navbarLightDropdownMenuLink">
+                        <li><a class="dropdown-item" href="#">B1</a></li>
+
+                        <li><a class="dropdown-item" href="#">B2</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">CCC</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">DDD</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">Login</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div th:replace="login::content">
+    Use content fragment to replace
+</div>
+</body>
+

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Leave</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        /* 居中放置表格 */
+        .center-table {
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        /* 增大评论文本框 */
+        #Comment {
+            height: 80px; /* 设置评论文本框的高度为 150 像素 */
+            resize: vertical;
+        }
+        
+        /* 按钮容器 */
+        .button-container {
+            margin-top: 20px; /* 设置按钮容器的顶部外边距 */
+            text-align: center; /* 居中按钮容器内的内容 */
+        }
+    </style>
+</head>
+<script>
+    function validateStatus() {
+        const validStatus = ['Applied', 'Approved', 'Rejected'];
+        let status = document.getElementById('Status').value;
+        let statuserror = document.getElementById('statuserror');
+        statuserror.textContent = '';
+        if (!validStatus.includes(status)) {
+            if(validStatus.some(title => title.toLowerCase() === status.toLowerCase())) {
+                statuserror.textContent = 'Status case incorrect, please use: '+ status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() + ' instead';
+            } else {
+                statuserror.textContent = 'Invalid status. Must be one of: Applied, Approved, Rejected';
+            }
+            statuserror.style.display = 'block';
+            return false;
+        }
+        return true;
+    }
+    function confirmUpdate() {
+        return validateStatus() && confirm('Are you sure you want to do this operation?');
+    }
+</script>
+<body>
+
+<nav th:replace="~{layout::navbar}"></nav>
+
+<div th:fragment="content" style="margin-top:100px;">
+    <div class="container mt-4">
+        <h2 class="text-center">Operate Leave</h2> <!-- 将标题移到表格中并居中显示 -->
+
+        <form th:action="@{/operateLeave}" th:object="${leaveApplicationDTO}" method="post" >
+            <input type="hidden" th:field="*{applicationId}"/>
+            
+            <table class="center-table">
+                <tr>
+                    <td><label for="UserID" class="form-label">UserID</label></td>
+                    <td><input type="number" id="UserID" class="form-control" th:field="*{UserID}" readonly></td>
+                </tr>
+                <tr>
+                    <td><label for="UserName" class="form-label">UserName</label></td>
+                    <td><input type="text" id="UserName" class="form-control" th:field="*{UserName}" readonly></td>
+                </tr>
+                <tr>
+                    <td><label for="LeaveType" class="form-label">LeaveType</label></td>
+                    <td><input type="text" id="LeaveType" class="form-control" th:field="*{LeaveType}" readonly></td>
+                </tr>
+                <tr>
+                    <td><label for="Reason" class="form-label">Reason</label></td>
+                    <td><input type="text" id="Reason" class="form-control" th:field="*{Reason}" readonly></td>
+                </tr>
+                <tr>
+                    <td><label for="StartDate" class="form-label">StartDate</label></td>
+                    <td><input type="date" id="StartDate" class="form-control" th:field="*{StartDate}" readonly></td>
+                </tr>
+                <tr>
+                    <td><label for="EndDate" class="form-label">EndDate</label></td>
+                    <td><input type="date" id="EndDate" class="form-control" th:field="*{EndDate}" readonly></td>
+                </tr>
+                <tr>
+                    <td><label for="Status" class="form-label">Status</label></td>
+                    <td>
+                        <select id="Status" class="form-control" th:field="*{Status}">
+                            <option value="Applied" th:selected="${status == 'Applied'}">Applied</option>
+                            <option value="Approved" th:selected="${status == 'Approved'}">Approved</option>
+                            <option value="Rejected" th:selected="${status == 'Rejected'}">Rejected</option>
+                        </select>
+                        <div id="statuserror" class="form-text" style="color: red"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="Comment" class="form-label">Comment</label></td>
+                    <td><textarea id="Comment" class="form-control" th:field="*{Comment}" style="resize: vertical;"></textarea></td>
+                </tr>
+                
+                
+				<tr>
+				    <td><label for="SubmitDate" class="form-label">SubmitDate</label></td>
+				    <td><input type="string" id="SubmitDate" class="form-control" th:value="${MySubmit}" readonly></td>
+				</tr>
+
+				
+
+                <tr>
+                    <td><label for="ApproveDate" class="form-label">ApproveDate</label></td>
+                    <td><input type="datetime" id="ApproveDate" class="form-control" th:field="*{ApproveDate}" readonly></td>
+                </tr>
+                
+                <script>
+    // 获取日期时间输入框元素
+    var approveDateInput = document.getElementById("ApproveDate");
+
+    // 获取日期时间字符串
+    var dateTimeString = approveDateInput.value;
+
+    // 将日期时间字符串转换为Date对象
+    var date = new Date(dateTimeString);
+
+    // 格式化日期时间为所需的格式：d/M/yy, h:mm a
+    var formattedDateTime = (date.getDate() + 1) + '/' + (date.getMonth() + 1) + '/' + date.getFullYear().toString().slice(-2) + ', ' + formatAMPM(date);
+
+    // 将格式化后的日期时间设置回输入框
+    approveDateInput.value = formattedDateTime;
+
+    // 格式化AM/PM
+    function formatAMPM(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 将0转换为12
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        var strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+</script>
+            </table>
+            
+			<div class="button-container">
+			    <button id="submit" type="submit" class="btn btn-primary" onclick="return confirmUpdate()" style="flex-grow: 1;">Update</button>
+			    <a id="moveback" href="/Manager/Leaves" class="btn btn-primary" style="width: fit-content; padding: 0.375rem 0.75rem;">Return</a>
+			</div>
+
+
+
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
+            

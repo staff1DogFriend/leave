@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>login</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <script src="/js/jquery-3.7.1.min.js"></script>
+</head>
+<script>
+    function hideErrorMessage() {
+        let errorMessage = document.getElementById('loginError');
+        if (errorMessage) {
+            errorMessage.style.display = 'none';
+        }
+    }
+
+    function saveUserId() {
+        if (document.getElementById('flexCheckChecked').checked) {
+            localStorage.setItem('userID', document.getElementById('UserID').value);
+        } else {
+            localStorage.removeItem('userID');
+        }
+    }
+
+    function loadUserId() {
+        let userID = localStorage.getItem('userID');
+        if (userID) {
+            document.getElementById('UserID').value = userID;
+            document.getElementById('flexCheckChecked').checked = true;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadUserId();
+        document.getElementById('login').addEventListener('click', saveUserId);
+    });
+</script>
+<body>
+<nav th:fragment="navbar"  class="navbar navbar-expand-lg bg-light fixed-top shadow-lg">
+    <div class="container">
+        <a style="font-family: 'Gigi', sans-serif" class="navbar-brand" href="#">Don't<span class="redfont">Leave</span><br><span class="greenfont">We will miss you!</span></a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">About</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div th:fragment="content">
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+         data-sidebar-position="fixed" data-header-position="fixed">
+        <div class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
+            <div class="d-flex align-items-center justify-content-center w-100">
+                <div class="row justify-content-center w-100">
+                    <div class="col-md-8 col-lg-6 col-xxl-3">
+                        <div class="card mb-0">
+                            <div class="card-body">
+                                <form role="form" action="/login" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label">UserID</label>
+                                        <input type="text" class="form-control" id="UserID" name="UserID" oninput="hideErrorMessage()">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="password" name="password" oninput="hideErrorMessage()">
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between mb-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input primary" type="checkbox" value=""
+                                                   id="flexCheckChecked" checked>
+                                            <label class="form-check-label text-dark" for="flexCheckChecked">
+                                                Remember Me
+                                            </label>
+                                        </div>
+                                        <a class="text-primary fw-bold" id="forgotPasswordLink" href="/index">Forgot Password?</a>
+                                    </div>
+                                    <input type="submit" id="login" value="Login" onclick="saveUserId()"
+                                           class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">
+                                    <div id="loginError" th:if="${loginError}" class="alert alert-danger" role="alert">
+                                        <p th:text="${loginError}"></p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    document.getElementById('forgotPasswordLink').addEventListener('click', function (e) {
+        e.preventDefault();
+        let userID = document.getElementById('UserID').value;
+        if (!userID) {
+            alert('Please enter your UserID.');
+            return;
+        }
+        $.ajax({
+            url: '/forgotPassword',
+            type: 'POST',
+            data: {
+                userID: userID
+            },
+            success: function (response) {
+                alert("Email sent to admin. Please wait for the response.");
+            },
+            error: function(xhr, status, error) {
+                alert(xhr.responseText);
+                alert(error);
+                alert(status);
+            }
+        });
+    });
+</script>

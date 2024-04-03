@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Leave</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<script>
+    function confirmUpdate() {
+        return confirm('Are you sure you want to update this record?');
+    }
+</script>
+<body>
+
+<nav th:replace="layout::navbar"></nav>
+
+<div th:fragment="content" style="margin-top:100px;font-family: Consolas,serif">
+    <div class="container mt-4">
+        <h2>Edit User</h2>
+        <br/>
+        <form th:action="@{/Admin/editUser}" th:object="${user}" method="post" onsubmit="return confirmUpdate()">
+            <div class="mb-3">
+                <label for="id" class="form-label">UserId</label>
+                <input type="number" id="id" class="form-control" th:field="*{id}" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Username</label>
+                <input type="text" id="name" class="form-control" th:field="*{name}">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="text" id="password" class="form-control" th:field="*{password}">
+            </div>
+            <div class="mb-3">
+                <label for="jobTitle" class="form-label">Job Title</label>
+                <input type="text" id="jobTitle" class="form-control" th:field="*{jobTitle}">
+            </div>
+
+            <div class="mb-3">
+                <label for="supervisor" class="form-label">Supervisor</label>
+                <input type="number" id="supervisor" class="form-control" th:field="*{supervisor}">
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

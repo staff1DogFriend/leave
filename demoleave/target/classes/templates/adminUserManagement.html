@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Page</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+<script src="/js/jquery-3.7.1.min.js"></script>
+<script>
+    function validateJobTitle() {
+        const validJobTitles = ['Admin', 'Manager', 'Employee'];
+        let jobTitle = document.getElementById('jobTitle').value;
+        if (!validJobTitles.includes(jobTitle)) {
+            if(validJobTitles.some(title => title.toLowerCase() === jobTitle.toLowerCase())) {
+                alert('Job title case incorrect, please use: '+ jobTitle.charAt(0).toUpperCase() + jobTitle.slice(1).toLowerCase() + ' instead');
+            } else {
+                alert('Invalid access right. Must be one of: Admin, Manager, Employee');
+            }
+            return false;
+        }
+        return true;
+    }
+    function confirmUpdate() {
+        return validateJobTitle();
+    }
+</script>
+<script>
+    function confirmDelete(id) {
+        if (confirm("Are you sure you want to delete this user entry?")) {
+            window.location.href = "/Admin/deleteUser?id=" + id;
+        }
+    }
+</script>
+<nav th:replace="~{layout::navbar}"></nav>
+<div th:fragment="content">
+    <table class="table-borderless table-sm align-middle"
+           style="width:1000px;margin-right: auto;margin-left: auto;margin-top:100px;align-content: center">
+        <tr>
+            <td style="width: 80%">
+                <div class="input-group mb-3">
+                    <form action="/Admin/searchUsers" method="get">
+                        <input style="height: 38px;width: 200px;border-radius: 5px;border:1px solid;text-indent: 2px" type="text" name="username" placeholder="Username" th:value="${username}">
+                        <input style="height: 38px;width: 80px;border-radius: 5px;border:1px solid;text-indent: 2px" type="number" name="userId" min="0" th:value="${userId}"
+                               placeholder="UserID">
+                        <select style="height: 38px;width: 180px;border-radius: 5px;border:1px solid;text-indent: 2px" name="jobTitle">
+						    <option value="">All Access Right</option>
+						    <option value="Admin" th:selected="${jobTitle == 'Admin'}">Admin</option>
+						    <option value="Manager" th:selected="${jobTitle == 'Manager'}">Manager</option>
+						    <option value="Employee" th:selected="${jobTitle == 'Employee'}">Employee</option>
+						</select>
+						<button type="submit" style="height: 40px;width: auto" class="btn btn-outline-secondary">
+                            <i class="bi bi-search"></i>Search
+                        </button>
+                        <input type="hidden" name="page" th:value="${usersPage.number}">
+        				<input type="hidden" name="size" th:value="${usersPage.size}">
+                    </form>
+                </div>
+            </td>
+            <td>
+            <form action="/Admin/searchUsers" method="get">
+			    <div class="input-group mb-3">
+			        <select name="size" class="form-select" style="height: 38px">
+			            <option value="2" th:selected="${usersPage.size==2}">2</option>
+			            <option value="4" th:selected="${usersPage.size==4}">4</option>
+			            <option value="8" th:selected="${usersPage.size==8}">8</option>
+			            <option value="16" th:selected="${usersPage.size==16}">16</option>
+			        </select>
+			        <button type="submit" class="btn btn-outline-secondary">
+			            Change<i class="bi bi-file-ruled"></i>
+			        </button>
+			        <!-- 保留搜索参数 -->
+			        <input type="hidden" name="username" th:value="${username}">
+			        <input type="hidden" name="userId" th:value="${userId}">
+			        <input type="hidden" name="jobTitle" th:value="${jobTitle}">
+			    </div>
+			</form>
+            </td>
+        </tr>
+        
+        <tr th:if="${usersPage.totalElements > 0}">
+            <td colspan="2">
+                <table class="table table-striped table-hover table-bordered border-primary-subtle">
+                    <thead class="table-secondary">
+                    <tr class="text-center">
+                        <th>Name</th>
+                        <th>UserID</th>
+                        <th>Password</th>
+                        <th>Access Right</th>
+                        <th>Supervisor ID</th>
+                        <th>Supervisor</th>
+                        
+                        <th>Date Of Birth</th>
+                        <th hidden>Age</th>
+                        <th>Years Of Work</th>
+                        <th>Join Date</th>
+                        <th>Email Address</th>
+                        <th>Operation</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="text-center" th:each="user : ${usersPage.content}">
+                        <td class="text-start" th:text="${user.name}"></td>
+                        <td th:text="${user.id}"></td>
+                        <td class="text-start" th:text="${user.password}"></td>
+                        <td th:text="${user.jobTitle}"></td>
+                        <td th:text="${user.supervisor}"></td>
+                        <td th:text="${supervisorNamesMap[__${user.id}__]}"></td>
+                        <td>
+						    <script th:inline="javascript">
+						        var startDate = /*[[ ${user.dateOfBirth} ]]*/ '';
+						        var formattedDate = startDate.substring(8, 10) +"-"+ startDate.substring(5, 7) +"-"+ startDate.substring(0, 4);
+						        document.write(formattedDate);
+						    </script>
+						</td>
+                        <td th:text="${user.age}" hidden></td>
+                        <td th:text="${user.yearsOfWork}"></td>
+			            <td>
+						    <script th:inline="javascript">
+						        var startDate = /*[[ ${user.joinDate} ]]*/ '';
+						        var formattedDate = startDate.substring(8, 10) +"-"+ startDate.substring(5, 7) +"-"+ startDate.substring(0, 4);
+						        document.write(formattedDate);
+						    </script>
+						</td>
+                        <td th:text="${user.emailAddress}"></td>
+                        
+                        <td><a th:href="@{/Admin/editUser(id=${user.id})}"><i class="bi bi-pencil"></i></a>
+                            <span style="color: #556CCC"> / </span>
+                            <a href="javascript:void(0);" th:attr="onclick='confirmDelete('+${user.id}+')'"><i class="bi bi-trash3"></i></a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+<!-- pagination -->
+<div th:if="${usersPage.totalElements > 0}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${usersPage.hasPrevious() ? '' : 'disabled'}">
+            <a class="page-link" th:href="@{/Admin/searchUsers(page=${usersPage.number - 1}, size=${usersPage.size}, username=${username}, userId=${userId}, jobTitle=${jobTitle})}"
+               aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li th:each="pageNum : ${#numbers.sequence(0, usersPage.totalPages - 1)}" class="page-item"
+            th:classappend="${pageNum == usersPage.number ? 'active' : ''}">
+            <a class="page-link" th:href="@{/Admin/searchUsers(page=${pageNum}, size=${usersPage.size}, username=${username}, userId=${userId}, jobTitle=${jobTitle})}"
+               th:text="${pageNum + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${usersPage.hasNext() ? '' : 'disabled'}">
+            <a class="page-link" th:href="@{/Admin/searchUsers(page=${usersPage.number + 1}, size=${usersPage.size}, username=${username}, userId=${userId}, jobTitle=${jobTitle})}"
+               aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<div style="margin-left: auto;margin-right: auto;height: auto;width: 800px" class="border border-warning"
+     th:if="${usersPage.totalElements == 0}">
+    <br/>
+    <br/>
+    <br/>
+    <h2 class="text-center display-2" style="font-family: 'Arial', sans-serif">No results found</h2>
+    <br/>
+    <br/>
+    <br/>
+</div>
+<div style="margin: 50px auto; width: 80%;">
+    <form id="addUserForm" action="/Admin/addUser" method="post" onsubmit="return confirmUpdate()">
+        <div class="row mb-3">
+            <div class="col-lg-3 text-lg-end">
+                <label for="name" class="col-form-label">Name:</label>
+            </div>
+            <div class="col-lg-9">
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-lg-3 text-lg-end">
+                <label for="password" class="col-form-label">Password:</label>
+            </div>
+            <div class="col-lg-9">
+                <input type="text" class="form-control" id="password" name="password" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+    <div class="col-lg-3 text-lg-end">
+        <label for="jobTitle" class="col-form-label">Access Right:</label>
+    </div>
+    <div class="col-lg-9">
+        <select class="form-control" id="jobTitle" name="jobTitle" required>
+            <option value="">Select Access Right</option>
+            <option value="Admin">Admin</option>
+            <option value="Manager">Manager</option>
+            <option value="Employee">Employee</option>
+        </select>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-lg-3 text-lg-end">
+        <label for="supervisorNamesMap" class="col-form-label">Supervisor:</label>
+    </div>
+    <div class="col-lg-9">
+        <select class="form-control" id="supervisorNamesMap" name="supervisor" required>
+            <option value="">Select Supervisor</option>
+            <!-- 使用 th:each 循环来显示下拉菜单的选项 -->
+            <th:block th:each="managerOrAdmin : ${managersAndAdmins}">
+                <option th:value="${managerOrAdmin.id}" th:text="${managerOrAdmin.name}"></option>
+            </th:block>
+        </select>
+    </div>
+</div>
+
+
+
+        <div class="row mb-3" hidden>
+		    <label for="age" class="col-sm-3 col-form-label">Age</label>
+		    <div class="col-sm-9">
+		        <input type="text" class="form-control" name="age" id="age" value="0">
+		    </div>
+		</div>
+
+        <div class="row mb-3">
+            <div class="col-lg-3 text-lg-end">
+                <label for="yearsOfWork" class="col-form-label">Years of Work:</label>
+            </div>
+            <div class="col-lg-9">
+                <input type="number" class="form-control" id="yearsOfWork" name="yearsOfWork" min="0" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-lg-3 text-lg-end">
+                <label for="emailAddress" class="col-form-label">Email Address:</label>
+            </div>
+            <div class="col-lg-9">
+                <input type="email" class="form-control" id="emailAddress" name="emailAddress" required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-lg-3 text-lg-end">
+                <label for="joinDate" class="col-form-label">Join Date:</label>
+            </div>
+            <div class="col-lg-9">
+                <input type="date" class="form-control" id="joinDate" name="joinDate" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-lg-3 text-lg-end">
+                <label for="birthday" class="col-form-label">Birthday:</label>
+            </div>
+            <div class="col-lg-9">
+                <input type="date" class="form-control" id="birthday" name="birthday" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-lg-12 text-lg-end">
+                <button type="submit" class="btn btn-primary">Add User Entry</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    $(document).ready(function () {
+        $('#addUserForm input').on('change', function () {
+            let allFilled = true;
+            $('#addUserForm input').each(function () {
+                if ($(this).val() === '') {
+                    allFilled = false;
+                    return false;
+                }
+            });
+            $('#addUserForm input[type=submit]').prop('disabled', !allFilled);
+        });
+    });
+</script>
+</html>

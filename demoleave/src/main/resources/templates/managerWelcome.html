@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Welcome Page</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script>
+        window.onload = function () {
+            let applicationStatus = window.ApplicationStatus;
+            if(applicationStatus != null){
+                alert(applicationStatus);
+            }
+        }
+    </script>
+</head>
+<body>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    window.ApplicationStatus = [[${ApplicationStatus}]];
+    /*]]>*/
+</script>
+<nav th:replace="~{layout::navbar}"></nav>
+
+<h1 class="text-center display-1" style="margin-top: 300px; ">Welcome, <span th:text="${session.user.name}"></span> !</h1>

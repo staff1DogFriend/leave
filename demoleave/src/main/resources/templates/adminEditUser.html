@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit User</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <script>
+        function validateJobTitle() {
+            const validJobTitles = ['Admin', 'Manager', 'Employee'];
+            let jobTitle = document.getElementById('jobTitle').value;
+            let jobTitleError = document.getElementById('jobTitleError');
+            jobTitleError.textContent = '';
+            if (!validJobTitles.includes(jobTitle)) {
+                if(validJobTitles.some(title => title.toLowerCase() === jobTitle.toLowerCase())) {
+                    jobTitleError.textContent = 'Job title case incorrect, please use: '+ jobTitle.charAt(0).toUpperCase() + jobTitle.slice(1).toLowerCase() + ' instead';
+                } else {
+                    jobTitleError.textContent = 'Invalid job title. Must be one of: Admin, Manager, Employee';
+                }
+                jobTitleError.style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+        function confirmUpdate() {
+            return validateJobTitle() && confirm('Are you sure you want to update this record?');
+        }
+    </script>
+</head>
+<body>
+
+<nav th:replace="~{layout::navbar}"></nav>
+
+<div th:fragment="content" style="margin-top: 50px">
+    <div class="container">
+        <h2>Edit User</h2>
+        <br/>
+        <form th:action="@{/Admin/editUser}" th:object="${user}" method="post" onsubmit="return confirmUpdate()">
+            <div class="row mb-3">
+                <label for="id" class="col-sm-3 col-form-label">UserId</label>
+                <div class="col-sm-9">
+                    <input type="number" id="id" class="form-control" th:field="*{id}" readonly required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="name" class="col-sm-3 col-form-label">Username</label>
+                <div class="col-sm-9">
+                    <input type="text" id="name" class="form-control" th:field="*{name}" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="password" class="col-sm-3 col-form-label">Password</label>
+                <div class="col-sm-9">
+                    <input type="text" id="password" class="form-control" th:field="*{password}" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="jobTitle" class="col-sm-3 col-form-label">Access Right</label>
+                <div class="col-sm-9">
+                    <select id="jobTitle" class="form-control" th:field="*{jobTitle}" required>
+                        <option value="">Select Access Right</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Employee">Employee</option>
+                    </select>
+                    <div id="jobTitleError" class="form-text" style="color: red"></div>
+                </div>
+            </div>
+
+            <div class="row mb-3" hidden>
+                <label for="supervisor" class="col-sm-3 col-form-label">Supervisor</label>
+                <div class="col-sm-9">
+                    <input type="number" id="supervisor" class="form-control" th:field="*{supervisor}" required>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <label for="supervisorId" class="col-sm-3 col-form-label">Supervisor</label>
+                <div class="col-sm-9">
+                    <select id="supervisorId" class="form-control" name="supervisorId" required>
+                        <option value="">Select Supervisor</option>
+                        <th:block th:each="managerOrAdmin : ${managersAndAdmins}">
+                            <option th:value="${managerOrAdmin.id}" th:text="${managerOrAdmin.name}" th:selected="${managerOrAdmin.id == user.supervisor}"></option>
+                        </th:block>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="dateOfBirth" class="col-sm-3 col-form-label">Birthday</label>
+                <div class="col-sm-9">
+                    <input type="date" id="dateOfBirth" class="form-control" th:field="*{dateOfBirth}" required>
+                </div>
+            </div>
+			<div class="row mb-3" hidden>
+			    <label for="age" class="col-sm-3 col-form-label">Age</label>
+			    <div class="col-sm-9">
+			        <input type="number" name="age" id="age" class="form-control" value="0">
+			    </div>
+			</div>
+
+            <div class="row mb-3">
+                <label for="yearsOfWork" class="col-sm-3 col-form-label">Years Of Work</label>
+                <div class="col-sm-9">
+                    <input type="number" id="yearsOfWork" class="form-control" th:field="*{yearsOfWork}" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="joinDate" class="col-sm-3 col-form-label">Join Date</label>
+                <div class="col-sm-9">
+                    <input type="date" id="joinDate" class="form-control" th:field="*{joinDate}" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="emailAddress" class="col-sm-3 col-form-label">Email Address</label>
+                <div class="col-sm-9">
+                    <input type="email" id="emailAddress" class="form-control" th:field="*{emailAddress}" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

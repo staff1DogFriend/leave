@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Leave Applications History</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<nav th:replace="~{layout::navbar}"></nav>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- Search bar -->
+<div class="container mb-3">
+    <div class="row align-items-center">
+        <div class="col-md-3">
+            <input id="year" class="form-control" type="number" name="year" placeholder="Year">
+        </div>
+        <div class="col-md-3">
+            <input id="month" class="form-control" type="number" name="month" min="0" placeholder="Month">
+        </div>
+        <div class="col-md-3">
+            <select id="status" class="form-control" name="status">
+                <option value="">All Status</option>
+                <option value="Applied">Applied</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button onclick="filterApplications()" class="btn btn-outline-secondary">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped table-hover table-bordered border-primary-subtle" style="width:1400px;margin-right: auto;margin-left: auto;margin-top:50px;align-content: center">
+    <thead class="table-secondary">
+        <tr class="text-center">
+            <th>Leave Type</th>
+            <th>Reason</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Submit Date</th>
+            <th>Approver ID</th>
+            <th>Approver Name</th>
+            <th>Approve Date</th>
+            <th>Comment</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody id="leaveApplicationsTable">
+        <!-- Iterate through the list of applications -->
+        <tr class="text-center" th:each="leaveApplication : ${leaveApplications}">
+            <td th:text="${leaveApplication.leaveType}"></td>
+            <td><textarea th:text="${leaveApplication.reason}" style="width: 300px; height: 100px;"></textarea></td>
+            <td>
+			    <script th:inline="javascript">
+			        var startDate = /*[[ ${leaveApplication.StartDate} ]]*/ '';
+			        var formattedDate = startDate.substring(8, 10) +"-"+ startDate.substring(5, 7) +"-"+ startDate.substring(0, 4);
+			        document.write(formattedDate);
+			    </script>
+			</td>
+            <td>
+			    <script th:inline="javascript">
+			        var startDate = /*[[ ${leaveApplication.EndDate} ]]*/ '';
+			        var formattedDate = startDate.substring(8, 10) +"-"+ startDate.substring(5, 7) +"-"+ startDate.substring(0, 4);
+			        document.write(formattedDate);
+			    </script>
+			</td>
+            <td th:text="${leaveApplication.status}"></td>
+            <td class="submit-date" th:text="${leaveApplication.submitDate}"></td>
+            <td th:text="${leaveApplication.approverID}"></td>
+            <td th:text="${leaveApplication.approverName}"></td>
+            <!-- 在 Thymeleaf 代码中为需要格式化日期的 <td> 元素添加类名 -->
+
+			<td class="approve-date" th:text="${leaveApplication.approveDate}"></td>
+
+			<!-- 在 JavaScript 中编写一个函数来格式化日期 -->
+			<script>
+			    function formatDates() {
+			        // 查找所有带有指定类名的 <td> 元素并进行日期格式化
+			        var submitDateCells = document.querySelectorAll('.submit-date');
+			        var approveDateCells = document.querySelectorAll('.approve-date');
+			
+			        submitDateCells.forEach(function(cell) {
+			            cell.innerText = formatDate(cell.innerText); // 格式化并更新日期文本
+			        });
+			
+			        approveDateCells.forEach(function(cell) {
+			            cell.innerText = formatDate(cell.innerText); // 格式化并更新日期文本
+			        });
+			    }
+			
+			    function formatDate(dateTimeString) {
+			        // 这里是你格式化日期时间的代码
+			        // 可以根据需要使用 JavaScript 的日期对象或其他方法
+			        // 例如，将日期时间字符串解析为日期对象，然后使用日期对象的方法进行格式化
+			        var dateTime = new Date(dateTimeString);
+			        var formattedDateTime = ''; // 初始化格式化后的日期时间字符串
+			
+			        // 检查日期时间对象是否有效
+			        if (!isNaN(dateTime.getTime())) {
+			            // 例如，将日期时间格式化为 dd-MM-yyyy HH:mm:ss 格式
+			            var date = ('0' + dateTime.getDate()).slice(-2) + '-' + ('0' + (dateTime.getMonth() + 1)).slice(-2) + '-' + dateTime.getFullYear();
+			            var time = ('0' + dateTime.getHours()).slice(-2) + ':' + ('0' + dateTime.getMinutes()).slice(-2) + ':' + ('0' + dateTime.getSeconds()).slice(-2);
+			            formattedDateTime = date + ' ' + time;
+			        }
+			
+			        return formattedDateTime; // 返回格式化后的日期时间字符串
+			    }
+			
+			    // 在页面加载完毕时调用 formatDates 函数
+			    window.onload = function() {
+			        formatDates();
+			    };
+			</script>
+
+            
+            <td><textarea th:text="${leaveApplication.comment}" style="width: 300px; height: 100px;"></textarea></td>
+            <td th:if="${leaveApplication.status=='Approved'}">
+                <form th:action="@{'/'+${session.user.jobTitle}+'/'+ ${session.user.id} + '/History/cancel'}" method="post">
+                    <input type="hidden" name="applicationId" th:value="${leaveApplication.id}" />
+                    <input type="hidden" name="leaveType" th:value="${leaveApplication.leaveType}" />
+                    <input type="hidden" name="status" th:value="${leaveApplication.status}" />
+                    <input type="hidden" name="startDate" th:value="${leaveApplication.startDate}" />
+                    <input type="hidden" name="endDate" th:value="${leaveApplication.endDate}" />
+                    <button type="submit" onclick="return confirmApprovedCancel()" class="btn btn-danger">Cancel</button>
+                </form>
+            </td>
+            <td th:if="${leaveApplication.status=='Applied'}">
+                <form th:action="@{'/'+${session.user.jobTitle}+'/'+ ${session.user.id} + '/History/cancel'}" method="post">
+                    <input type="hidden" name="applicationId" th:value="${leaveApplication.id}" />
+                    <input type="hidden" name="leaveType" th:value="${leaveApplication.leaveType}" />
+                    <input type="hidden" name="status" th:value="${leaveApplication.status}" />
+                    <input type="hidden" name="startDate" th:value="${leaveApplication.startDate}" />
+                    <input type="hidden" name="endDate" th:value="${leaveApplication.endDate}" />
+                    <button type="submit" onclick="return confirmAppliedCancel()" class="btn btn-danger">Cancel</button>
+                </form>
+            </td>
+            <td th:if="${leaveApplication.status=='Rejected'}"></td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+function filterApplications() {
+    var year = document.getElementById("year").value;
+    var month = document.getElementById("month").value;
+    var status = document.getElementById("status").value;
+    var table = document.getElementById("leaveApplicationsTable");
+    var rows = table.getElementsByTagName("tr");
+
+    // Loop through all table rows
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var cells = row.getElementsByTagName("td");
+        
+        // Extract year and month from the start date column (cells[2])
+        var startDateText = cells[2].innerText;
+        var startDate = new Date(startDateText);
+        var cellYear = startDate.getFullYear().toString();
+        var cellMonth = (startDate.getMonth() + 1).toString().padStart(2, '0');
+
+        // Check if the row matches the filter criteria
+        var matchYear = (year === "" || cellYear.includes(year));
+        var matchMonth = (month === "" || cellMonth.includes(month));
+        var matchStatus = (status === "" || cells[4].innerText.includes(status));
+
+        // Display or hide the row based on the filter criteria
+        if (matchYear && matchMonth && matchStatus) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    }
+}
+
+</script>
+
+</body>
+</html>

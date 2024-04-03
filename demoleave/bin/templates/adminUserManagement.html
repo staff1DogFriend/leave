@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Page</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+<script src="/js/jquery-3.7.1.min.js"></script>
+<script>
+    function confirmDelete(id) {
+        if (confirm("Are you sure you want to delete this leave entry?")) {
+            window.location.href = "/Admin/deleteUser?id=" + id;
+        }
+    }
+</script>
+<nav class="navbar navbar-expand-lg bg-light fixed-top shadow-lg">
+    <div class="container">
+        <a style="font-family: 'Gigi', sans-serif" class="navbar-brand" href="#">Gra<span
+                class="redfont">nny</span><span class="greenfont">Leave</span></a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="/Admin">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">Apply</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle click-scroll" href="#" id="navbarLightDropdownMenuLink"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">Management</a>
+
+                    <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="navbarLightDropdownMenuLink">
+                        <li><a class="dropdown-item" href="/Admin/Users">User management</a></li>
+
+                        <li><a class="dropdown-item" href="/Admin/Leaves">Leave management</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">View History</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="#">Movement Register</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" href="/login">Login</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div th:fragment="content">
+    <table class="table-borderless table-sm align-middle"
+           style="font-family: 'Consolas', sans-serif; width:1000px;margin-right: auto;margin-left: auto;margin-top:100px;align-content: center">
+        <tr>
+            <td style="width: 80%">
+                <div class="input-group mb-3">
+                    <form action="/Admin/searchUsers" method="get">
+                        <input style="height: 38px;width: 200px;border-radius: 5px;border:1px solid;text-indent: 2px" type="text" name="username" placeholder="Username">
+                        <input style="height: 38px;width: 80px;border-radius: 5px;border:1px solid;text-indent: 2px" type="number" name="userId" min="0"
+                               placeholder="UserID">
+                        <input style="height: 38px;width: 180px;border-radius: 5px;border:1px solid;text-indent: 2px" type="text" name="jobTitle" placeholder="Job Title">
+                        <button type="submit" style="height: 40px;width: auto" class="btn btn-outline-secondary">
+                            <i class="bi bi-search"></i>Search
+                        </button>
+                    </form>
+                </div>
+            </td>
+            <td>
+                <form action="#" th:action="@{/Admin/Leaves}" method="get">
+                    <div class="input-group mb-3">
+                        <select name="size" class="form-select" style="height: 38px">
+                            <option value="2" th:selected="${usersPage.size==2}">2</option>
+                            <option value="4" th:selected="${usersPage.size==4}">4</option>
+                            <option value="8" th:selected="${usersPage.size==8}">8</option>
+                            <option value="16" th:selected="${usersPage.size==16}">16</option>
+                        </select>
+                        <button type="submit" class="btn btn-outline-secondary">
+                            Change<i class="bi bi-file-ruled"></i>
+                        </button>
+                    </div>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${usersPage.totalElements > 0}">
+            <td colspan="2">
+                <table class="table table-striped table-hover table-bordered border-primary-subtle">
+                    <thead class="table-secondary">
+                    <tr class="text-center">
+                        <th>Name</th>
+                        <th>UserID</th>
+                        <th>Password</th>
+                        <th>Job Title</th>
+                        <th>Supervisor</th>
+                        <th>Operation</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="text-center" th:each="user : ${usersPage.content}">
+                        <td class="text-start" th:text="${user.name}"></td>
+                        <td th:text="${user.id}"></td>
+                        <td class="text-start" th:text="${user.password}"></td>
+                        <td th:text="${user.jobTitle}"></td>
+                        <td th:text="${user.supervisor}"></td>
+                        <td><a th:href="@{/Admin/editUser(id=${user.id})}"><i class="bi bi-pencil"></i></a>
+                            <span style="color: #556CCC"> / </span>
+                            <a href="javascript:void(0);" th:attr="onclick='confirmDelete('+${user.id}+')'"><i class="bi bi-trash3"></i></a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+<!-- 分页控制 -->
+<div th:if="${usersPage.totalElements > 0}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${usersPage.hasPrevious() ? '' : 'disabled'}">
+            <a class="page-link" th:href="@{/Admin/Users(page=${usersPage.number - 1}, size=${usersPage.size})}"
+               aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li th:each="pageNum : ${#numbers.sequence(0, usersPage.totalPages - 1)}" class="page-item"
+            th:classappend="${pageNum == usersPage.number ? 'active' : ''}">
+            <a class="page-link" th:href="@{/Admin/Users(page=${pageNum}, size=${usersPage.size})}"
+               th:text="${pageNum + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${usersPage.hasNext() ? '' : 'disabled'}">
+            <a class="page-link" th:href="@{/Admin/Users(page=${usersPage.number + 1}, size=${usersPage.size})}"
+               aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div style="margin-left: auto;margin-right: auto;height: auto;width: 800px" class="border border-warning"
+     th:if="${usersPage.totalElements == 0}">
+    <br/>
+    <br/>
+    <br/>
+    <h2 class="text-center display-2" style="font-family: 'Arial', sans-serif">No results found</h2>
+    <br/>
+    <br/>
+    <br/>
+</div>
+<form id="addUserForm" action="/Admin/addUser" method="post">
+    <table style="width: auto;margin-right: auto;margin-left: auto;margin-top: auto" class="table-borderless table-sm">
+        <tr>
+            <td class="text-lg-end" style="width: auto">
+                <label for="id">UserId:</label>
+            </td>
+            <td>
+                <input style="width: 100px" type="number" id="id" name="id" required>
+            </td>
+            <td rowspan="4">
+                <input style="width: 80px;height: 80px" class="btn-outline-secondary" type="submit"
+                       value="Add&#10User&#10Entry" disabled>
+            </td>
+        </tr>
+        <tr>
+            <td class="text-lg-end">
+                <label for="name">Name:</label>
+            </td>
+            <td>
+                <input style="width: 100px" type="text" id="name" name="name" required>
+            </td>
+        </tr>
+        <tr>
+            <td class="text-lg-end">
+                <label for="password">Password:</label>
+            </td>
+            <td>
+                <input style="width: 100px" type="text" id="password" name="password" required>
+            </td>
+        </tr>
+        <tr>
+            <td class="text-lg-end">
+                <label for="jobTitle">Job Title:</label>
+            </td>
+            <td>
+                <input style="width: 100px" type="text" id="jobTitle" name="jobTitle" required>
+            </td>
+        </tr>
+        <tr>
+            <td class="text-lg-end">
+                <label for="supervisor">Supervisor:</label>
+            </td>
+            <td>
+                <input style="width: 100px" type="number" min="0" id="supervisor" name="supervisor" required>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+<script>
+    $(document).ready(function () {
+        $('#addUserForm input').on('change', function () {
+            $('#addUserForm input[type="submit"]').prop('disabled', true);
+            let allFilled = true;
+            $('#addUserForm input').each(function () {
+                if ($(this).val() === '') {
+                    allFilled = false;
+                    return false;
+                }
+            });
+            if (allFilled) {
+                $.ajax({
+                    url: "/Admin/checkUserExist",
+                    type: "post",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        "id": $('#id').val(),
+                        "name": $('#name').val(),
+                        "password": $('#password').val(),
+                        "jobTitle": $('#jobTitle').val(),
+                        "supervisor": $('#supervisor').val()
+                    }),
+                    success: function (exist) {
+                        let submitButton = $('#addUserForm input[type="submit"]');
+                        submitButton.off('click');
+                        if (exist) {
+                            submitButton.click(function (e) {
+                                e.preventDefault();
+                                if (confirm("A record already exists. Overwrite anyway? (not recommended)")) {
+                                    $('#addUserForm').submit();
+                                } else {
+                                    submitButton.prop('disabled', true);
+                                }
+                            });
+                        }
+                        submitButton.prop('disabled', false);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    });
+</script>
+</html>

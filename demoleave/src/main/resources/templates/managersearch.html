@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Page</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<nav th:replace="~{layout::navbar}"></nav>
+
+
+<div th:fragment="content">
+    <table class="table-borderless table-sm align-middle"
+           style=" width:800px;margin-right: auto;margin-left: auto;margin-top:100px;align-content: center">
+        <tr>
+            <td style="width: 80%">
+                <div class="input-group mb-3">
+                    <form action="/Manager/searchLeaves" method="get">
+                        <input style="height: 38px;width: 200px;border-radius: 5px;border:1px solid;text-indent: 2px" type="text" name="username" placeholder="Username">
+                        <input style="height: 38px;width: 80px;border-radius: 5px;border:1px solid;text-indent: 2px" type="number" name="userId" min="0"
+                               placeholder="UserID">
+                        <button type="submit" style="height: 40px;width: auto" class="btn btn-outline-secondary">
+                            <i class="bi bi-search"></i>Search
+                        </button>
+                    </form>
+                </div>
+            </td>
+            <td>
+    			<form action="#" th:action="@{/Manager/AllMyLeaves}" method="get">
+        			<div class="input-group mb-3">
+			 	        <select name="size" class="form-select" style="height: 38px">
+			                <option value="2" th:attr="selected=${leavesPage.size == 2}">2</option>
+			                <option value="4" th:attr="selected=${leavesPage.size == 4}">4</option>
+			                <option value="8" th:attr="selected=${leavesPage.size == 8}">8</option>
+			            </select>
+			            <button type="submit" class="btn btn-outline-secondary">
+			                Change<i class="bi bi-file-ruled"></i>
+			            </button>
+        			</div>
+    			</form>
+			</td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table class="table table-striped table-hover table-bordered border-primary-subtle">
+                    <thead class="table-secondary">
+                    <tr class="text-center">
+                        <th>ApplicationID</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Operation</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+					
+                    <tr class="text-center" th:each="leave : ${leavesPage.content}">
+    					<td class="text-center" th:text="${leave.ApplicationId}"></td>
+    					<td class="text-center" th:text="${leave.UserName}"></td>
+    					<td th:text="${leave.status}"></t>
+					    <td th:text="${leave.LeaveType}"></td>
+					    <td th:text="${leave.StartDate}"></td>
+					    <td th:text="${leave.EndDate}"></td>
+					    <td><a th:href="@{/operateLeave(applicationId=${leave.ApplicationId})}">Edit</a></td>
+					</tr>
+					</div>
+
+
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- 分页控制 -->
+<div th:if="${leavesPage.totalElements > 0}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${leavesPage.hasPrevious() ? '' : 'disabled'}">
+            <a class="page-link" th:href="@{/Manager/AllMyLeaves(page=${leavesPage.number - 1}, size=${leavesPage.size})}"
+               aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li th:each="pageNum : ${#numbers.sequence(0, leavesPage.totalPages - 1)}" class="page-item"
+            th:classappend="${pageNum == leavesPage.number ? 'active' : ''}">
+            <a class="page-link" th:href="@{/Manager/AllMyLeaves(page=${pageNum}, size=${leavesPage.size})}"
+               th:text="${pageNum + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${leavesPage.hasNext() ? '' : 'disabled'}">
+            <a class="page-link" th:href="@{/Manager/AllMyLeaves(page=${leavesPage.number + 1}, size=${leavesPage.size})}"
+               aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+</body>
+</html>

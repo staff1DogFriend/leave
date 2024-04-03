@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OperateHistory</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <!-- 添加这一行来引入 Papa Parse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+<nav th:replace="~{layout::navbar}"></nav>
+
+<div th:fragment="content">
+    <table id="table1" class="table-borderless table-sm align-middle"
+           style=" width:800px;margin-right: auto;margin-left: auto;margin-top:100px;text-align:center;vertical-align: middle; argin: auto;">
+        <tr>
+             <td style="width: 80%">
+                <div class="input-group mb-3">
+                    <form action="/Manager/searchLeaves" method="get">
+                        <input style="height: 38px;width: 200px;border-radius: 5px;border:1px solid;text-indent: 2px" type="text" name="username" placeholder="Username" th:value="${username}">
+                        <input style="height: 38px;width: 80px;border-radius: 5px;border:1px solid;text-indent: 2px" type="number" name="userId" min="0"
+                               placeholder="UserID" th:value="${userId}">
+                        <input style="height: 38px;width: 80px;border-radius: 5px;border:1px solid;text-indent: 2px" type="number" name="year" min="0"
+                               placeholder="Year" th:value="${year}">
+                        <input style="height: 38px;width: 80px;border-radius: 5px;border:1px solid;text-indent: 2px" type="number" name="month" min="0"
+                               placeholder="Month" th:value="${month}">
+                        <button type="submit" style="height: 40px;width: auto" class="btn btn-outline-secondary">
+                            <i class="bi bi-search"></i>Search
+                        </button>
+                        <input type="hidden" name="from" value="Approved">
+                        <!-- 保留分页参数 -->
+                        <input type="hidden" name="page" th:value="${page}">
+                        <input type="hidden" name="size" th:value="${size}">
+                    </form>
+                </div>
+                
+                <script>
+    // 获取表单元素和输入框
+    var form = document.querySelector('form');
+    var yearInput = document.querySelector('input[name="year"]');
+    var monthInput = document.querySelector('input[name="month"]');
+
+    // 监听表单提交事件
+    form.addEventListener('submit', function(event) {
+        // 如果月份输入框不为空，但年份输入框为空，则阻止表单提交
+        if (monthInput.value && !yearInput.value) {
+            alert('Please enter the year when specifying the month.');
+            event.preventDefault(); // 阻止表单提交
+        }
+    });
+</script>
+                
+            </td>
+            <td>
+    			<form action="/Manager/searchLeaves" method="get">
+				    <div class="input-group mb-3">
+				        <select name="size" class="form-select" style="height: 38px">
+				            <option value="2" th:attr="selected=${leavesPage.size == 2}">2</option>
+				            <option value="4" th:attr="selected=${leavesPage.size == 4}">4</option>
+				            <option value="8" th:attr="selected=${leavesPage.size == 8}">8</option>
+				            <option value="16" th:attr="selected=${leavesPage.size == 16}">16</option>
+				        </select>
+				        <button type="submit" class="btn btn-outline-secondary">
+				            Change<i class="bi bi-file-ruled"></i>
+				        </button>
+				        <!-- 保留搜索参数 -->
+				        <input type="hidden" name="username" th:value="${username}">
+				        <input type="hidden" name="userId" th:value="${userId}">
+				        <input type="hidden" name="year" th:value="${year}">
+				        <input type="hidden" name="month" th:value="${month}">
+				        <input type="hidden" name="from" value="Approved">
+				    </div>
+				</form>
+			</td>
+
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table id="Mytable" class="table table-striped table-hover table-bordered border-primary-subtle">
+                    <thead class="table-secondary">
+                    <tr class="text-center">
+						<th hidden>ApplicationID</th>
+                                                                                                                                                 
+                        <th>User Name</th>
+                        <th hidden>User ID</th>
+			            <th>Leave Type</th>
+			            <th>Start Date</th>
+			            <th>End Date</th>
+			            <th>Status</th>
+			            <th>Approver ID</th>
+			            <th>Supervisor Name</th>
+			            <th>Approve Date</th>
+			            <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="text-center" th:each="leave : ${leavesPage.content}">
+    					<td class="text-center" th:text="${leave.ApplicationId}" hidden></td>
+    					<td th:text="${leave.UserName}"></td>
+    					<td th:text="${leave.UserID}" hidden></td>
+    					
+    					<td th:text="${leave.LeaveType}"></td>
+    					<td>
+						    <script th:inline="javascript">
+						        var startDate = /*[[ ${leave.StartDate} ]]*/ '';
+						        var formattedDate = startDate.substring(8, 10) +"-"+ startDate.substring(5, 7) +"-"+ startDate.substring(2, 4);
+						        document.write(formattedDate);
+						    </script>
+						</td>
+
+                        <td>
+						    <script th:inline="javascript">
+						        var startDate = /*[[ ${leave.EndDate} ]]*/ '';
+						        var formattedDate = startDate.substring(8, 10) +"-"+ startDate.substring(5, 7) +"-"+ startDate.substring(2, 4);
+						        document.write(formattedDate);
+						    </script>
+						</td>
+    					<td th:text="${leave.Status}"></td>
+    					<td th:text="${leave.ApproverID}"></td>
+    					<td th:text="${supervisorNamesMap[__${leave.ApplicationId}__]}"></td>
+    					<td style="width: 150px;" th:text="${#temporals.format(leave.ApproveDate, 'dd-MM-yyyy HH:mm:ss')}"></td>
+
+    					<td><a th:href="@{/operateLeave(applicationId=${leave.ApplicationId})}">Check Info</a></td>
+					</tr>
+
+
+                </table>
+            </td>
+        </tr>
+        <tr><td></td>
+			<td>
+				<button type="button" onclick="exportToCSV()">Save the Table</button>
+				
+			</td>
+		</tr>
+
+    </table>
+</div>
+
+
+<script>
+    function exportToCSV() {
+    // 获取表格数据
+    var table = document.getElementById("Mytable");
+    var data = [];
+
+    // 遍历表格行
+    for (let i = 0; i < table.rows.length; i++) {
+        var rowData = [];
+
+        // 遍历行中的每个单元格
+        for (let j = 0; j < table.rows[i].cells.length - 1; j++) {
+            rowData.push(table.rows[i].cells[j].innerText);
+            
+        }
+
+        // 将行数据添加到主数据数组
+        data.push(rowData);
+    }
+
+    console.log(data);
+
+    // 使用Papa.parse将数据转换为CSV格式
+    var csv = Papa.unparse(data);
+
+    // 创建包含CSV数据的Blob
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+    // 创建一个触发下载的链接元素
+    var link = document.createElement("a");
+    if (link.download !== undefined) {
+        var url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "table_data.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link); // 移除链接元素
+    }
+}
+
+
+</script>
+
+
+
+
+<!-- 分页控制 -->
+<div th:if="${leavesPage.totalElements > 0}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${leavesPage.hasPrevious() ? '' : 'disabled'}">
+            <a class="page-link" th:href="@{/Manager/searchLeaves(page=${leavesPage.number - 1}, size=${leavesPage.size}, username=${username}, userId=${userId}, year=${year}, month=${month}, from=${from})}"
+               aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li th:each="pageNum : ${#numbers.sequence(0, leavesPage.totalPages - 1)}" class="page-item"
+            th:classappend="${pageNum == leavesPage.number ? 'active' : ''}">
+            <a class="page-link" th:href="@{/Manager/searchLeaves(page=${pageNum}, size=${leavesPage.size}, username=${username}, userId=${userId}, year=${year}, month=${month}, from=${from})}"
+               th:text="${pageNum + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${leavesPage.hasNext() ? '' : 'disabled'}">
+            <a class="page-link" th:href="@{/Manager/searchLeaves(page=${leavesPage.number + 1}, size=${leavesPage.size}, username=${username}, userId=${userId}, year=${year}, month=${month}, from=${from})}"
+               aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>layout</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+
+    <style>
+        /* 调整导航栏链接文本的字体大小 */
+        .navbar-nav .nav-link {
+            font-size: 0.8rem; /* 80% 的字体大小 */
+        }
+    </style>
+</head>
+<body style="zoom: 80%;">
+<nav th:fragment="navbar"  class="navbar navbar-expand-lg bg-light fixed-top shadow-lg">
+    <div class="container">
+        <a style="font-family: 'Gigi', sans-serif" class="navbar-brand" href="#">Don't<span class="redfont">Leave</span><br><span class="greenfont">We will miss you!</span></a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" th:href="@{'/'+ ${session.user.jobTitle}}">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" th:href="@{'/'+ ${session.user.jobTitle} +'/'+ ${session.user.id} + '/leaveSubmission'}">Apply</a>
+                </li>
+				
+				
+				<li class="nav-item dropdown" th:if="${session.user.jobTitle!='Employee'}">
+                    <a class="nav-link dropdown-toggle click-scroll" href="#" id="navbarLightDropdownMenuLink"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">Status</a>
+
+                    <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="navbarLightDropdownMenuLink" >
+                        <li><a class="dropdown-item" href="/Manager/Leaves">Applied</a></li>
+
+                        <li><a class="dropdown-item" href="/Manager/Approved">Approved</a></li>
+                        
+                        <li><a class="dropdown-item" href="/Manager/Rejected">Rejected</a></li>
+                    </ul>
+                </li>
+				
+               <!-- User management 链接 -->
+				<li th:if="${session.user.jobTitle=='Admin'}" class="nav-item">
+				    <a class="nav-link click-scroll" href="/Admin/Users">Staff Administration</a>
+				</li>
+				
+				<!-- Leave management 链接 -->
+				<li th:if="${session.user.jobTitle=='Admin'}" class="nav-item">
+				    <a class="nav-link click-scroll" href="/Admin/Leaves">Leave Balance</a>
+				</li>
+				
+				<!-- Leave management 链接 -->
+				<li th:if="${session.user.jobTitle == 'Manager'}" class="nav-item">
+				    <a class="nav-link click-scroll" href="/Manager/LeaveBalance">Leave Balance</a>
+				</li>
+
+                
+                <li class="nav-item">
+                    <a class="nav-link click-scroll" th:href="@{'/'+${session.user.jobTitle}+'/'+${session.user.id}+'/History'}">Leave History</a>
+                </li>
+				
+				<li class="nav-item">
+                    <a class="nav-link click-scroll" href="/MovementRegister">Authorized Leaves</a>
+                </li>
+                
+                <li class="nav-item" th:if="${session.user==null}">
+                    <a class="nav-link click-scroll" href="/login">Login</a>
+                </li>
+
+                <li class="nav-item" th:if="${session.user!=null}">
+                    <a class="nav-link click-scroll" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div th:replace="login::content">
+    Use content fragment to replace
+</div>
+</body>
+</html>

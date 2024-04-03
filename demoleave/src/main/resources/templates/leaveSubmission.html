@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Submission Form</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav th:replace="~{layout::navbar}"></nav>
+    <div th:fragment="content">
+        <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+            data-sidebar-position="fixed" data-header-position="fixed">
+            <div
+                class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
+                <div class="d-flex align-items-center justify-content-center w-100">
+                    <div class="row justify-content-center w-100">
+                        <div class="col-md-8 col-lg-6 col-xxl-3">
+                            <div class="card mb-0">
+                                <div class="card-body">
+                                    <form role="form" method="post" th:action="@{'/'+ ${session.user.jobTitle} +'/'+ ${session.user.id} + '/submitLeave'}">
+                                        <h4 style="font-weight: bold;"> Start Your Leave Application</h4>
+                                        <br>
+                                        <div class="row">
+                                            <div class="col-sm-12 mt-2">
+                                                <label for="startDate" style="font-weight: bold;font-size: 17px;">Start
+                                                    Date:</label>
+                                                <input type="date" id="startDate" name="startDate" required>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-sm-12 mt-2">
+                                                <label for="endDate" style="font-weight: bold;font-size: 17px;">End
+                                                    Date:</label>
+                                                <input type="date" id="endDate" name="endDate" required><br>
+                                            </div>
+                                        </div>
+                                        <br>
+
+                                        <label style="font-weight: bold;font-size: 17px;">Leave Type:</label><br>
+                                        <label>
+                                            <input type="radio" id="annual" name="leaveType" value="Annual" required>
+                                            Annual
+                                        </label>
+                                        <label>
+                                            <input type="radio" id="sick" name="leaveType" value="Sick" required> Sick
+                                        </label>
+                                        <label>
+                                            <input type="radio" id="compassion" name="leaveType" value="Compassion"
+                                                required> Compassion
+                                        </label>
+                                        <label>
+                                            <input type="radio" id="company" name="leaveType" value="Company"
+                                                required> Company
+                                        </label>
+                                        <br>
+                                        <label>
+                                            <input type="radio" id="birthday" name="leaveType" value="Birthday"
+                                                required> Birthday
+                                        </label>
+                                        <label>
+                                            <input type="radio" id="timeOff" name="leaveType" value="TimeOff"
+                                                required> TimeOff
+                                        </label>
+                                        <label>
+                                            <input type="radio" id="unpaid" name="leaveType" value="Unpaid"
+                                                required> Unpaid
+                                        </label>
+                                        <label>
+                                            <input type="radio" id="hospital" name="leaveType" value="Hospital"
+                                                required> Hospital
+                                        </label>
+                                        <br>
+                                        <div class="row">
+                                            <div class="col-sm-12 mt-2">
+                                                <label for="reason" style="font-weight: bold;font-size: 17px;">Enter
+                                                    Your Leave Reason:</label>
+                                                <input type="text" id="reason" name="reason" class="form-control"
+                                                    required>
+                                            </div>
+                                        </div>
+                                        <br>
+
+                                        <button type="submit" onclick="return submitForm()" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Submit Leave</button>
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Get the start date and end date input fields
+    var startDateInput = document.getElementById('startDate');
+    var endDateInput = document.getElementById('endDate');
+
+    // Set the minimum value for the start date input field to the current date
+    startDateInput.min = new Date().toISOString().split('T')[0];
+
+    // When the start date changes, set the minimum value for the end date input field to the start date
+    startDateInput.addEventListener('change', function () {
+        endDateInput.min = startDateInput.value;
+    });
+
+    // Set the minimum value for the end date input field to the start date
+    endDateInput.min = startDateInput.value;
+</script>
+<!-- Include moment.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script>
+    // Function to be executed when the user submits the form
+    function submitForm() {
+        // Get the start date and end date
+        var startDate = moment(document.getElementById('startDate').value);
+        var endDate = moment(document.getElementById('endDate').value);
+
+        
+        // Ensure that the leave dates do not span across years
+        if (startDate.year() !== endDate.year()) {
+            alert("Please fill the table again and make sure leave dates not span across years.");
+            return false; // Prevent form submission
+        }
+        
+        // Ensure that the start date and end date do not cross January and February
+        if (startDate.month() !== endDate.month() && (startDate.month() === 0)) {
+            alert("Leave for January should be requested separately.");
+            return false; // Prevent form submission
+        }
+        
+        // Additional form validation logic...
+        
+        // If all validation passes, allow form submission
+        return true;
+    }
+</script>
+
+</body>
+
+</html>
